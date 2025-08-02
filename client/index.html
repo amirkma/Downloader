@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دانلودر آنلاین</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazir&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://uploadkon.ir/uploads/bf1625_25Screenshot-2024-03-04-150309.png">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Vazir', sans-serif;
+            color: #fff;
+            background: linear-gradient(135deg, #000000, #0a1a2a);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .custom-frame {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            border: 2px solid #00c4cc;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 700px;
+            margin: 20px auto;
+            text-align: center;
+            box-shadow: 0 0 20px #00c4cc;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px #00c4cc; }
+            50% { box-shadow: 0 0 30px #00c4cc; }
+            100% { box-shadow: 0 0 10px #00c4cc; }
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #333;
+            color: #e0e0e0;
+            font-family: 'Vazir', sans-serif;
+        }
+        button {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #00c4cc, #0077b6);
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            margin-top: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Vazir', sans-serif;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #00c4cc;
+        }
+        #result { margin-top: 20px; color: #00c4cc; }
+        .footer {
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            margin-top: auto;
+        }
+        .footer-time { font-size: 0.8em; color: #00c4cc; }
+    </style>
+</head>
+<body>
+    <main class="main-content">
+        <div class="custom-frame">
+            <input type="text" id="urlInput" placeholder="لینک ویدیو، موسیقی، ریلز، استوری یا پست را وارد کنید...">
+            <button onclick="downloadFile()">دانلود</button>
+            <div id="result">این دانلودر از یوتیوب، اینستاگرام، آپارات، اسپاتیفای، ساندکلاود و غیره پشتیبانی می‌کند.</div>
+        </div>
+    </main>
+    <footer class="footer">
+        <p>© ۱۴۰۴ دانلودر آنلاین. تمامی حقوق محفوظ است.</p>
+        <div class="footer-time" id="footerTime"></div>
+    </footer>
+    <script>
+        async function downloadFile() {
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText = 'در حال پردازش...';
+
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const data = await response.json();
+                if (data.error) {
+                    resultDiv.innerText = `خطا: ${data.error}`;
+                    return;
+                }
+                const a = document.createElement('a');
+                a.href = data.downloadUrl;
+                a.download = data.title;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                resultDiv.innerText = `دانلود از ${data.extractor} شروع شد!`;
+            } catch (error) {
+                resultDiv.innerText = `خطا: ${error.message}`;
+            }
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const time = new Intl.DateTimeFormat('fa-IR', {
+                timeZone: 'Asia/Tehran',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }).format(now);
+            const date = new Intl.DateTimeFormat('fa-IR', {
+                timeZone: 'Asia/Tehran',
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }).format(now);
+            document.getElementById('footerTime').innerText = `${date} | ${time}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+</body>
+</html>
